@@ -1,0 +1,257 @@
+﻿//mysql 简单实用
+Enter password: ****
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 5
+Server version: 5.6.32-log MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> SHOW DATABASES; //显示所有的数据库
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| mysqlname          |
+| performance_schema |
+| sakila             |
+| test               |
+| user               |
+| world              |
++--------------------+
+8 rows in set (0.01 sec)
+
+mysql> USE test; //使用test库
+Database changed
+mysql> SELECT DATABASE(); //查看当前使用的库
++------------+
+| DATABASE() |
++------------+
+| test       |
++------------+
+1 row in set (0.00 sec)
+
+mysql>  CREATE TABLE tb1(    //创建一张表 tb1 ：出现错误
+    -> username VARCHAR(20),
+    -> age TINYINT UNSGINED,
+    -> salary FLOAT(8,2) UNSIGNED);
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that
+corresponds to your MySQL server version for the right syntax to use near 'UNSGI
+NED,
+salary FLOAT(8,2) UNSIGNED)' at line 3
+mysql>  CREATE TABLE tb1(   //创建一张表 tb1
+    -> username VARCHAR(20),
+    -> age TINYINT UNSIGNED,
+    -> salary FLOAT(8,2) UNSIGNED);
+Query OK, 0 rows affected (0.27 sec)
+
+mysql> SHOW TABLES;  //显示该库下所有表
++----------------+
+| Tables_in_test |
++----------------+
+| tb1            |
++----------------+
+1 row in set (0.00 sec)
+
+mysql> SHOW TABLES FROM mysql; //显示 mysql库下的所有表
++---------------------------+
+| Tables_in_mysql           |
++---------------------------+
+| columns_priv              |
+| db                        |
+| event                     |
+| func                      |
+| general_log               |
+| help_category             |
+| help_keyword              |
+| help_relation             |
+| help_topic                |
+| innodb_index_stats        |
+| innodb_table_stats        |
+| ndb_binlog_index          |
+| plugin                    |
+| proc                      |
+| procs_priv                |
+| proxies_priv              |
+| servers                   |
+| slave_master_info         |
+| slave_relay_log_info      |
+| slave_worker_info         |
+| slow_log                  |
+| tables_priv               |
+| time_zone                 |
+| time_zone_leap_second     |
+| time_zone_name            |
+| time_zone_transition      |
+| time_zone_transition_type |
+| user                      |
++---------------------------+
+28 rows in set (0.00 sec)
+
+mysql> SELECT DATABASE(); // 验证：当查看其它库下的表时，不会改变当前所选的库；
++------------+
+| DATABASE() |
++------------+
+| test       |
++------------+
+1 row in set (0.00 sec)
+
+mysql> SHOW COLUMNS FROM tb1; //查看tb1表的列
++----------+---------------------+------+-----+---------+-------+
+| Field    | Type                | Null | Key | Default | Extra |
++----------+---------------------+------+-----+---------+-------+
+| username | varchar(20)         | YES  |     | NULL    |       |
+| age      | tinyint(3) unsigned | YES  |     | NULL    |       |
+| salary   | float(8,2) unsigned | YES  |     | NULL    |       |
++----------+---------------------+------+-----+---------+-------+
+3 rows in set (0.02 sec)
+
+mysql> INSERT tb1 VALUES("Tom",23,7890.26); //插入tb1表数据：省略name
+Query OK, 1 row affected (0.04 sec)
+
+mysql> INSERT tb1 (username, salary) VALUES("John", 4500.23); //插入tb1表数据
+Query OK, 1 row affected (0.04 sec)
+
+mysql> SELECT * FROM tb1;
++----------+------+---------+
+| username | age  | salary  |
++----------+------+---------+
+| Tom      |   23 | 7890.26 |
+| John     | NULL | 4500.23 |
++----------+------+---------+
+2 rows in set (0.00 sec)
+
+mysql> CREATE TABLE tb2(  // 约束 不为空 :NOT NULL; 为空 : NULL;
+    -> username VARCHAR(20) NOT NULL,
+    -> age TINYINT UNSIGNED NULL);
+Query OK, 0 rows affected (0.26 sec)
+
+mysql> INSERT tb2 VALUES("Tom", NULL);
+Query OK, 1 row affected (0.04 sec)
+
+mysql> SELECT * FROM tb2; //查看tb2表
++----------+------+
+| username | age  |
++----------+------+
+| Tom      | NULL |
++----------+------+
+1 row in set (0.00 sec)
+
+mysql> INSERT tb2 VALUES(NULL,20); //不能为空，否则报错
+ERROR 1048 (23000): Column 'username' cannot be null
+
+mysql> CREATE TABLE tb3(  // 创建表时 AUTO_INCREMENT 自增必须与 PRIMARY KEY 主键一起使用，否则报错
+    -> id SMALLINT UNSIGNED AUTO_INCREMENT,
+    -> username VARCHAR(30) NOT NULL);
+ERROR 1075 (42000): Incorrect table definition; there can be only one auto colum
+n and it must be defined as a key
+mysql> CREATE TABLE tb3(  //正确创建主键
+    -> id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    -> username VARCHAR(30) NOT NULL);
+Query OK, 0 rows affected (0.22 sec)
+
+mysql> SHOW COLUMNS FROM tb3; //查看tb3表
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(30)          | NO   |     | NULL    |                |
++----------+----------------------+------+-----+---------+----------------+
+2 rows in set (0.01 sec)
+
+mysql>  INSERT tb3 (username) VALUES ("tom");
+Query OK, 1 row affected (0.03 sec)
+
+mysql> INSERT tb3 (username) VALUES("Rose");
+Query OK, 1 row affected (0.03 sec)
+
+mysql> INSERT tb3 (username) VALUES ("Dimitar");
+Query OK, 1 row affected (0.03 sec)
+
+mysql> SELECT * FROM tb3;  //查看tb3表，主键自动增长
++----+----------+
+| id | username |
++----+----------+
+|  1 | tom      |
+|  2 | Rose     |
+|  3 | Dimitar  |
++----+----------+
+3 rows in set (0.00 sec)
+
+mysql> CREATE TABLE tb4( //创建tb4 主键可以自己设置（单独使用）
+    -> id SMALLINT UNSIGNED PRIMARY KEY,
+    -> username VARCHAR(20) NOT NULL);
+Query OK, 0 rows affected (1.32 sec)
+
+mysql> SHOW COLUMNS FROM tb4; //查看tb4表
++----------+----------------------+------+-----+---------+-------+
+| Field    | Type                 | Null | Key | Default | Extra |
++----------+----------------------+------+-----+---------+-------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    |       |
+| username | varchar(20)          | NO   |     | NULL    |       |
++----------+----------------------+------+-----+---------+-------+
+2 rows in set (0.01 sec)
+
+mysql> INSERT tb4 VALUES(22,"John");
+Query OK, 1 row affected (0.03 sec)
+
+mysql> SELECT * FROM tb4;
++----+----------+
+| id | username |
++----+----------+
+| 22 | John     |
++----+----------+
+1 row in set (0.00 sec)
+
+mysql> CREATE TABLE tb5( // 创建tb5表，允许创建多个UNIQUSE KEY（不允许重复的键）
+    -> id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    -> username VARCHAR(20) NOT NULL UNIQUE KEY,
+    -> age TINYINT UNSIGNED);
+Query OK, 0 rows affected (0.22 sec)
+
+mysql> SHOW COLUMNS FROM tb5;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(20)          | NO   | UNI | NULL    |                |
+| age      | tinyint(3) unsigned  | YES  |     | NULL    |                |
++----------+----------------------+------+-----+---------+----------------+
+3 rows in set (0.01 sec)
+
+mysql> INSERT tb5(username,age) VALUES("Tom",23);
+Query OK, 1 row affected (0.03 sec)
+
+mysql> CREATE TABLE tb6( // 添加枚举 ENUM
+    -> id SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    -> username VARCHAR(20) NOT NULL UNIQUE KEY,
+    -> sex ENUM("1","2","3") DEFAULT "3");
+Query OK, 0 rows affected (0.25 sec)
+
+mysql> SHOW COLUMNS FROM tb6;
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| username | varchar(20)          | NO   | UNI | NULL    |                |
+| sex      | enum('1','2','3')    | YES  |     | 3       |                |
++----------+----------------------+------+-----+---------+----------------+
+3 rows in set (0.01 sec)
+
+mysql> INSERT tb6 (username)VALUES("tom");
+Query OK, 1 row affected (0.03 sec)
+
+mysql> SELECT * FROM tb6;
++----+----------+------+
+| id | username | sex  |
++----+----------+------+
+|  1 | tom      | 3    |
++----+----------+------+
+1 row in set (0.00 sec)
+//-------------------------------------第一节课------------------------------------
