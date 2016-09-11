@@ -1,0 +1,101 @@
+//-------------------------------------第二节课------------------------------------
+
+---约束
+1.约束保证数据的完整性和一致性
+2.约束分为表级约束和列级约束
+3.约束类型包括：
+	NOT NULL(非空约束)
+	PRIMARY KEY(主键约束)
+	UNIQUE KEY(唯一约束)
+	DEFAULT (默认约束)
+	FOREIGN KEY (外键约束)
+
+//-----------FOREIGN KEYp(外键约束)----
+一、保证数据一致性，完整性
+	实现一对一 或 一对多的关系
+
+二、要求：
+	1.父表和子表必须使用相同的存储引擎，而且禁止使用临时表。
+	2.数据表的存储引擎只能为InnoDB.
+	3.外键列和参照列必须具有相似的数据类型。其中数字的长度或是否有符号为必须相同；
+	而字符长度可以不同。
+	4.外键列和参照列必须创建索引。如果外键列不存在索引，MySQL则会自动创建索引。
+	
+三、如何来编辑数据表的默认存储引擎？
+		MySQL 配置文件：
+			default-storage-engine=INNDB
+			
+四、代码：
+
+Enter password: ****
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2
+Server version: 5.6.32-log MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> USE test; //打开test数据库
+Database changed
+mysql> create table school(  //创建school父表
+    -> id SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    -> name VARCHAR(20) NOT NULL
+    -> );
+Query OK, 0 rows affected (0.23 sec)
+
+mysql> SHOW CREATE TABLE school; //查看school表 配置
++--------+----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-----------------+
+| Table  | Create Table
+
+                 |
++--------+----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-----------------+
+| school | CREATE TABLE `school` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 |
++--------+----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-----------------+
+1 row in set (0.00 sec)
+
+mysql> CREATE TABLE student( //创建student子表 ，外键pid -- 与父表id类型不一致
+    -> id SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    -> username VARCHAR(10) NOT NULL,
+    -> pid BIGINT,
+    -> FOREIGN KEY(pid) REFERENCES school(id)
+    -> );
+ERROR 1215 (HY000): Cannot add foreign key constraint //创建失败
+mysql> CREATE TABLE student(//创建student子表，外键pid -- 与父类id类型一致，长度不一致
+    -> id SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    -> username VARCHAR(10) NOT NULL,
+    -> pid SMALLINT,
+    -> FOREIGN KEY(pid) REFERENCES school(id)
+    -> );
+ERROR 1215 (HY000): Cannot add foreign key constraint //创建失败
+mysql> CREATE TABLE student( //创建student子表，外键pid -- 与父类id完全一致时
+    -> id SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    -> username VARCHAR(10) NOT NULL,
+    -> pid SMALLINT UNSIGNED,
+    -> FOREIGN KEY (pid) REFERENCES school(id)
+    -> );
+Query OK, 0 rows affected (0.32 sec) //创建成功
+
+------------------------第二节课 2小节------------------------------------
+五、外键约束的参照操作
+	1.CASCADE : 从父表删除或更新且自动删除或更新子表中匹配的行
+	2.SET NULL: 从父表删除或更新行，并设置子表中的外键列为NULL.如果使用该选项，必须保证子表列没有指定NOT NULL
+	3.RESTRICT : 拒绝对父表的删除或更新操作。
+	4.NO ACTION: 标准SQL的关键字，在MySQL中与RESTRICT相同
+	
+
+	
